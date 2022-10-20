@@ -1,0 +1,81 @@
+Transform:
+  - AWS::LanguageExtensions
+  - cloudenv
+  - AWS::Serverless-2016-10-31
+
+Resources:
+  NodeExample:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: nodejs16.x
+      Handler: index.handler
+      Environment:
+        Variables:
+          HELLO: WORLD
+        Secrets:
+          MY_SECRET: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/name
+          MY_SECOND_SECRET: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/name
+          THIRD_SECRET: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/third
+          REAL_SECRET: !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:mysecret-rlBksU
+      InlineCode: |
+        exports.handler = async function(event) {
+          return { 
+            'HELLO'           : process.env['HELLO'],
+            'MY_SECRET'       : process.env['MY_SECRET'],
+            'MY_SECOND_SECRET': process.env['MY_SECOND_SECRET'],
+            'THIRD_SECRET'    : process.env['THIRD_SECRET'],
+            'REAL_SECRET'     : process.env['REAL_SECRET'],
+          }
+        }
+
+  PyExample:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [arm64]
+      Runtime: python3.9
+      Handler: index.handler
+      AutoPublishAlias: live
+      Environment:
+        Variables:
+          HELLO: WORLD
+        Secrets:
+          MY_SECRET:        !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/name
+          MY_SECOND_SECRET: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/name
+          THIRD_SECRET:     !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/third
+          REAL_SECRET:      !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:mysecret-rlBksU
+      InlineCode: |
+        import os
+        
+        def handler(event, context):
+          return { 
+            'HELLO'           : os.environ['HELLO'],
+            'MY_SECRET'       : os.environ['MY_SECRET'],
+            'MY_SECOND_SECRET': os.environ['MY_SECOND_SECRET'],
+            'THIRD_SECRET'    : os.environ['THIRD_SECRET'],
+            'REAL_SECRET'     : os.environ['REAL_SECRET'],
+          }
+
+  CustomRuntimeExample:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [arm64]
+      Runtime: provided.al2
+      Handler: ./example
+      AutoPublishAlias: live
+      CodeUri: ./example/example
+      Environment:
+        Variables:
+          HELLO: WORLD.
+        Secrets:
+          MY_SECRET:        !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/name
+          MY_SECOND_SECRET: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/name
+          THIRD_SECRET:     !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/my/parameter/third
+          REAL_SECRET:      !Sub arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:mysecret-rlBksU
+
+Outputs:
+  NodeExample:
+    Value: !Ref NodeExample
+  PyExample:
+    Value: !Ref PyExample.Version
+  CustomRuntimeExample:
+    Value: !Ref CustomRuntimeExample.Version

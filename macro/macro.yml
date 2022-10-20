@@ -1,0 +1,52 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Architectures: [arm64]
+      Runtime: python3.9
+      Handler: macro.handler
+      CodeUri: ./macro.py
+      AutoPublishAlias: live
+      MemorySize: 512
+      Environment:
+        Variables:
+          LayerX8664: !Ref LayerX8664
+          LayerArm64: !Ref LayerArm64
+          BootstrapLayer: !Ref BootstrapLayer
+
+  BootstrapLayer:
+    Type: AWS::Lambda::LayerVersion
+    UpdateReplacePolicy: Retain
+    Properties:
+      CompatibleArchitectures: [x86_64, arm64]
+      Content: ../bootstrap
+
+  LayerX8664:
+    Type: AWS::Lambda::LayerVersion
+    UpdateReplacePolicy: Retain
+    Properties:
+      CompatibleArchitectures: [x86_64]
+      Content: ../built/x86_64/cloudenv
+
+  LayerArm64:
+    Type: AWS::Lambda::LayerVersion
+    UpdateReplacePolicy: Retain
+    Properties:
+      CompatibleArchitectures: [arm64]
+      Content: ../built/arm64/cloudenv
+
+  Macro:
+    Type: AWS::CloudFormation::Macro
+    Properties:
+      Name: cloudenv
+      FunctionName: !Ref Function.Alias
+
+Outputs:
+  Function:
+    Value: !Ref Function.Version
+  LayerArm64:
+    Value: !Ref LayerArm64
+  LayerX8664:
+    Value: !Ref LayerX8664
