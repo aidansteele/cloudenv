@@ -1,5 +1,7 @@
 # `cloudenv`
 
+See also: [my blog post][my-blog].
+
 I wish that AWS Lambda functions could be configured to use secrets stored in
 AWS Parameter Store and AWS Secrets Manager in the same way that AWS ECS task
 definitions can be. Specifically, I wish I could do this:
@@ -98,4 +100,5 @@ required by the fact that `provided` and `provided.al2` Lambda runtimes don't
 support [wrapper scripts][wrapper-scripts]. So the function's `Handler` needs to
 be a command that executes the actual Lambda function handler in those cases.
 
+[my-blog]: https://awsteele.com/blog/2022/10/19/configuration-in-the-cloud.html
 [wrapper-scripts]: https://docs.aws.amazon.com/lambda/latest/dg/runtimes-modify.html#runtime-wrapper
