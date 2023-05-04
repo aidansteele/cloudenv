@@ -79,10 +79,14 @@ func populateParameters(ctx context.Context, api *ssm.Client, params map[string]
 	arnChunks := chunk[string](keys(params), 10)
 	for _, arns := range arnChunks {
 		names := make([]string, len(arns))
-		for i, arn := range arns {
-			// arn:aws:ssm:us-east-1:514202201242:parameter/arn
-			split := strings.SplitN(arn, ":", 6)
-			names[i] = strings.TrimPrefix(split[5], "parameter")
+		for i := range arns {
+			if strings.HasPrefix(arns[i], "arn:") {
+				// arn:aws:ssm:us-east-1:514202201242:parameter/arn
+				split := strings.SplitN(arns[i], ":", 6)
+				names[i] = strings.TrimPrefix(split[5], "parameter")
+			} else {
+				names[i] = arns[i]
+			}
 		}
 
 		get, err := api.GetParameters(ctx, &ssm.GetParametersInput{
